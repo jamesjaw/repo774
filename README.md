@@ -7,6 +7,11 @@ pip install -r requirements.txt
 python -m spacy download en_core_web_sm
 ```
 
+Remember to add OPENAI_API_KEY as an environment variable:
+```bash
+export OPENAI_API_KEY=[key_value]
+```
+
 # Project Proposal for CS 774
 
 ## Team ID: 2
