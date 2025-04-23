@@ -6,7 +6,8 @@ from metric import BNGMetrics
 import os
 
 VERSION_ADD_TABLE_NAME = 0
-VERSION_ADD_NO_CRYPTED_WORD = 1
+VERSION_ADD_NO_CRYPTED_WORD = 0
+VERSION_ADD_EVERY_WORD_EXPANDED = 1
 
 def load_pickle(filename):
     with open(filename, 'rb') as file:
@@ -84,7 +85,7 @@ if __name__ == "__main__":
 
     temp_prompt = PromptTemplate()
     model_name = "gpt-3.5-turbo"
-    model = OpenaiLLM("gpt-3.5-turbo")
+    model = OpenaiLLM(model_name)
     num_examples = sum([len(ele["gt_label"]) for ele in json_total])
     all_table_results = []
 
@@ -92,6 +93,8 @@ if __name__ == "__main__":
         demos = temp_prompt.demos()
         if VERSION_ADD_NO_CRYPTED_WORD:
             demos += "There should not be any crypted word in your expanded names. "
+        elif VERSION_ADD_EVERY_WORD_EXPANDED:
+            demos += "Every single word in the column names should be expanded. "
         prompt = (
             demos + json["query"]
         )
