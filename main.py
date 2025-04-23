@@ -5,7 +5,7 @@ from llm import PromptTemplate, OpenaiLLM
 from metric import BNGMetrics
 import os
 
-VERSION_ADD_TABLE_NAME = 1
+VERSION_ADD_TABLE_NAME = 0
 
 def load_pickle(filename):
     with open(filename, 'rb') as file:

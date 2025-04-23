@@ -14,7 +14,9 @@ export OPENAI_API_KEY=[key_value]
 
 # Current Result
 ## Most Basic Prompt
-![alt-text]()
+![alt-text](./image/basic.png)
+## Prompt with Table Name
+![alt-text](./image/with_table_name.png)
 
 # Project Proposal for CS 774
 
