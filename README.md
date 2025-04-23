@@ -1,4 +1,4 @@
-## Installation
+# Installation
 
 To install the required packages, run:
 
@@ -11,6 +11,10 @@ Remember to add OPENAI_API_KEY as an environment variable:
 ```bash
 export OPENAI_API_KEY=[key_value]
 ```
+
+# Current Result
+## Most Basic Prompt
+![alt-text]()
 
 # Project Proposal for CS 774
 

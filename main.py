@@ -5,6 +5,7 @@ from llm import PromptTemplate, OpenaiLLM
 from metric import BNGMetrics
 import os
 
+VERSION_ADD_TABLE_NAME = 1
 
 def load_pickle(filename):
     with open(filename, 'rb') as file:
@@ -26,7 +27,10 @@ def preprocess_AdventureWork_1():
     ]
     for item in json_structs:
         aliases = " | ".join(item["technical_name"])
-        item["query"] = f"As abbreviations of column names from a table, {aliases} stand for"
+        table_name = ""
+        if VERSION_ADD_TABLE_NAME:
+            table_name = " named " + item["table_name"]
+        item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for"
     assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
     return json_structs
 
@@ -71,7 +75,7 @@ if __name__ == "__main__":
     json_adv1 = preprocess_AdventureWork_1()
     # json_adv2 = preprocess_AdventureWork_2()
     # json_edi = preprocess_EDI_demo()
-    json_total = json_adv1 #+ json_adv2
+    json_total = json_adv1  # + json_adv2
     # json_string = json.dumps(json_total, indent=2)
     # print(json_string)
 
