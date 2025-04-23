@@ -19,7 +19,7 @@ export OPENAI_API_KEY=[key_value]
 ### Reason for this:
 Adding table information might help what table the column belongs to, giving the LLM more context.
 ### Result:
-![alt-text](./image/every_word_expanded.png)
+![alt-text](./image/basic.png)
 
 ## Prompt with extra string "There should not be any crypted word in your expanded names. " (Slightly Better than Basic Prompt)
 ### Reason for this:
@@ -31,7 +31,7 @@ Some columns are still in abbreviated form after the expansion.
 ### Reason for this:
 Some columns are still in abbreviated form after the expansion.
 ### Result:
-![alt-text](./image/no_crypted.png)
+![alt-text](./image/every_word_expanded.png)
 
 # Project Proposal for CS 774
 
