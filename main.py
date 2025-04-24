@@ -4,10 +4,7 @@ import json as j
 from llm import PromptTemplate, OpenaiLLM
 from metric import BNGMetrics
 import os
-
-VERSION_ADD_TABLE_NAME = 0
-VERSION_ADD_NO_CRYPTED_WORD = 0
-VERSION_ADD_EVERY_WORD_EXPANDED = 1
+import settings as s
 
 def load_pickle(filename):
     with open(filename, 'rb') as file:
@@ -30,42 +27,12 @@ def preprocess_AdventureWork_1():
     for item in json_structs:
         aliases = " | ".join(item["technical_name"])
         table_name = ""
-        if VERSION_ADD_TABLE_NAME:
+        if s.VERSION_ADD_TABLE_NAME:
             table_name = " named " + item["table_name"]
-        item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for"
+        item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for "
     assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
     return json_structs
 
-
-def preprocess_AdventureWork_2():
-    df = load_pickle("./dataset/AdventureWork_2/gold.pkl")
-    grouped = df.groupby(['Table'])
-    json_structs = [
-        {
-            "dataset_name": "AdventureWork_2",
-            "table_name": group_df['Table'].iloc[0],
-            "technical_name": group_df['COLUMN_NAME_2'].tolist(),
-            "gt_label": group_df['GT_LABEL_2'].tolist()
-        }
-        for key, group_df in grouped
-    ]
-    for item in json_structs:
-        aliases = " | ".join(item["technical_name"])
-        item["query"] = f"As abbreviations of column names from a table, {aliases} stand for"
-    assert(len(df) == sum(len(item["gt_label"]) for item in json_structs))
-    return json_structs
-
-# def preprocess_EDI_demo():
-    # df = load_pickle("./dataset/AdventureWork_2/gold.pkl")
-    # grouped = df.groupby(['Table'])
-    # json_structs = [
-    #     {
-    #         "dataset_name": "AdventureWork_2",
-    #         "table_name": group_df['Table'].iloc[0],
-    #         "gt_label": group_df['GT_LABEL_2'].tolist()
-    #     }
-    #     for key, group_df in grouped
-    # ]
 
 def extract_answer(raw_answer_str: str, sep_token: str):
     processed_str = raw_answer_str.strip("").split(".")[0]
@@ -91,10 +58,11 @@ if __name__ == "__main__":
 
     for _idx, json in enumerate(json_total):
         demos = temp_prompt.demos()
-        if VERSION_ADD_NO_CRYPTED_WORD:
+        if s.VERSION_ADD_NO_CRYPTED_WORD:
             demos += "There should not be any crypted word in your expanded names. "
-        elif VERSION_ADD_EVERY_WORD_EXPANDED:
+        elif s.VERSION_ADD_EVERY_WORD_EXPANDED:
             demos += "Every single word in the column names should be expanded. "
+
         prompt = (
             demos + json["query"]
         )
