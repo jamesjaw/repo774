@@ -37,7 +37,7 @@ Some columns are still in abbreviated form after the expansion.
 ### Prompt:
 "To expand crypted column names, follow the following rules: "
             "1. As abbreviations of column names from a table, c_name | pCd | dt stand for Customer Name | Product Code | Date. "
-            "2. Base on the the given table name, generate the most possible expanded column name. "
+            "2. Based on the given table name, generate the most possible expanded column name. "
             "3. The words in a expanded column name shouldn't be joined together (separate by space). "
             "4. Make sure your expanded names are fully expanded (e.g. HTTP could further expand to Hypertext Transfer Protocol) "
 ### Reasons for this:
