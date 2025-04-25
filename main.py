@@ -19,11 +19,14 @@ def preprocess_AdventureWork_1():
         {
             "dataset_name": "AdventureWork_1",
             "table_name": group_df['Table'].iloc[0],
+            # technical_name is column names
             "technical_name": group_df['COLUMN_NAME_1'].tolist(),  # crypted name
+            # todo: explanded gold with synonyms?
             "gt_label": group_df['GT_LABEL_1'].tolist()
         }
         for key, group_df in grouped
     ]
+    
     for item in json_structs:
         aliases = " | ".join(item["technical_name"])
         table_name = ""
@@ -55,7 +58,7 @@ if __name__ == "__main__":
     model = OpenaiLLM(model_name)
     num_examples = sum([len(ele["gt_label"]) for ele in json_total])
     all_table_results = []
-
+    # each json is each table in the dataset
     for _idx, json in enumerate(json_total):
         demos = temp_prompt.demos()
         if s.VERSION_ADD_NO_CRYPTED_WORD:
@@ -67,6 +70,7 @@ if __name__ == "__main__":
             demos + json["query"]
         )
         print(prompt)
+        # y_list is gold list. Index mapping to x_list (column names).
         x_list, y_list = json["technical_name"], json["gt_label"]
         raw_answer = model(prompt, temperature=0.0, max_tokens=1024)
 
