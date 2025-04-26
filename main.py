@@ -54,7 +54,7 @@ if __name__ == "__main__":
     print("============ Start Feeding Data to GPT ============")
 
     temp_prompt = PromptTemplate()
-    model_name = "gpt-3.5-turbo"
+    model_name = "gpt-4o-mini"
     model = OpenaiLLM(model_name)
     num_examples = sum([len(ele["gt_label"]) for ele in json_total])
     all_table_results = []
