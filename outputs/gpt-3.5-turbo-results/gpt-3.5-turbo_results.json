@@ -1,0 +1,8 @@
+{
+    "squad-em": 0.7703848662752772,
+    "squad-f1": 0.8944700123026933,
+    "squad-pm": 0.9743966079582518,
+    "model-name": "gpt-3.5-turbo",
+    "total-num-example": 825,
+    "demo": "To expand crypted column names, follow the following rules: 1. As abbreviations of column names from a table, c_name | pCd | dt stand for Customer Name | Product Code | Date. 2. Based on the given table name, generate the most possible expanded column name. 3. The words in a expanded column name shouldn't be joined together (separate by space). 4. Make sure your expanded names are fully expanded (e.g. HTTP could further expand to Hypertext Transfer Protocol) "
+}

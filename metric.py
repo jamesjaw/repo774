@@ -5,6 +5,9 @@ from collections import Counter
 from evaluate import load
 import spacy
 
+import json
+import os
+
 # We need the following corpus for
 # python -m spacy download en_core_web_sm
 
@@ -199,6 +202,29 @@ class SQuAD_eval:
         for pred, ref in zip(predictions, references):
             if isinstance(ref, str):
                 ref = self.normalize_answer(ref)
+                # TODO 1 using synonym to expland reference(gold)
+                print("old:", ref)
+                try:
+                    sysnonyms_path = "./dataset/AdventureWork_1/synonyms.json"
+                    if os.path.exists(sysnonyms_path):
+                        with open(sysnonyms_path, 'r', encoding='utf-8') as f:
+                            synonyms_dict = json.load(f)
+                        expanded_refs = list(ref)
+                        for norm_answer in ref:
+                            words = norm_answer.split()
+                            for i, word in enumerate(words):
+                                if word in synonyms_dict:
+                                    for synonym in synonyms_dict[word]:
+                                        new_words = words.copy()
+                                        new_words[i] = synonym
+                                        new_answer = " ".join(new_words)
+                                        if new_answer not in expanded_refs:
+                                                expanded_refs.append(new_answer)
+                        ref = expanded_refs
+                except Exception as e:
+                    print((f"Warning: Failed to load or process synonyms: {e}"))
+                print("new:", ref)
+                
             else:
                 # TODO we will support multi groundtruth in the future
                 raise NotImplementedError
