@@ -16,6 +16,7 @@ class PromptTemplate:
             "3. The words in a expanded column name shouldn't be joined together (separate by space). "
             "4. Make sure your expanded names are fully expanded (e.g. HTTP could further expand to Hypertext Transfer Protocol) "
         )
+
         if s.VERSION_STEPS:
             return _demo_steps
         return _demo

@@ -5,6 +5,7 @@ from llm import PromptTemplate, OpenaiLLM
 from metric import BNGMetrics
 import os
 import settings as s
+import argparse
 
 def load_pickle(filename):
     with open(filename, 'rb') as file:
@@ -33,6 +34,71 @@ def preprocess_AdventureWork_1():
     assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
     return json_structs
 
+def preprocess_AdventureWork_2():
+    df = load_pickle("./dataset/AdventureWork_2/gold.pkl")
+    grouped = df.groupby(['Table'])
+    json_structs = [
+        {
+            "dataset_name": "AdventureWork_2",
+            "table_name": group_df['Table'].iloc[0],
+            "technical_name": group_df['COLUMN_NAME_2'].tolist(),  # crypted name
+            "gt_label": group_df['GT_LABEL_2'].tolist()
+        }
+        for key, group_df in grouped
+    ]
+    for item in json_structs:
+        aliases = " | ".join(item["technical_name"])
+        table_name = ""
+        if s.VERSION_ADD_TABLE_NAME:
+            table_name = " named " + item["table_name"]
+        item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for "
+    assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
+    return json_structs
+
+def preprocess_EDI_demo():
+    df = load_pickle("./dataset/EDI_demo/gold.pkl")
+    print(df)
+    grouped = df.groupby(['dataset_id', 'table_id'])
+    json_structs = [
+        {
+            "dataset_name": "EDI_demo",
+            "table_name": group_df['table_name'].iloc[0],
+            "technical_name": group_df['column_name'].tolist(),  # crypted name
+            "gt_label": group_df['gt_label'].tolist()
+        }
+        for key, group_df in grouped
+    ]
+    for item in json_structs:
+        aliases = " | ".join(item["technical_name"])
+        table_name = ""
+        if s.VERSION_ADD_TABLE_NAME:
+            table_name = " named " + item["table_name"]
+        item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for "
+    assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
+    return json_structs
+
+# def preprocess_nameguess():
+#     df = load_pickle("./dataset/nameguess/gold.pkl")
+#     print(df)
+#     grouped = df.groupby(['dataset_id', 'table_id'])
+#     json_structs = [
+#         {
+#             "dataset_name": "nameguess",
+#             "table_name": group_df['table_name'].iloc[0],
+#             "technical_name": group_df['column_name'].tolist(),  # crypted name
+#             "gt_label": group_df['gt_label'].tolist()
+#         }
+#         for key, group_df in grouped
+#     ]
+#     for item in json_structs:
+#         aliases = " | ".join(item["technical_name"])
+#         table_name = ""
+#         if s.VERSION_ADD_TABLE_NAME:
+#             table_name = " named " + item["table_name"]
+#         item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for "
+#     assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
+#     return json_structs
+
 
 def extract_answer(raw_answer_str: str, sep_token: str):
     processed_str = raw_answer_str.strip("").split(".")[0]
@@ -41,10 +107,19 @@ def extract_answer(raw_answer_str: str, sep_token: str):
 
 
 if __name__ == "__main__":
-    json_adv1 = preprocess_AdventureWork_1()
-    # json_adv2 = preprocess_AdventureWork_2()
-    # json_edi = preprocess_EDI_demo()
-    json_total = json_adv1  # + json_adv2
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset', type=str, help='dataset you\'d like to run')
+    args = parser.parse_args()
+
+    if args.dataset == "AdventureWork_1":
+        json_total = preprocess_AdventureWork_1()
+    elif args.dataset == "AdventureWork_2":
+        json_total = preprocess_AdventureWork_2()
+    elif args.dataset == "EDI_demo":
+        json_total = preprocess_EDI_demo()
+    elif args.dataset == "nameguess":
+        pass
+
     # json_string = json.dumps(json_total, indent=2)
     # print(json_string)
 
