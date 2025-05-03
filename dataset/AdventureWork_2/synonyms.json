@@ -1,26 +1,26 @@
 {
-    "modified": "modification",
-    "row": "record",
-    "expire": "expiration",
+    "modified": ["modification"],
+    "row": ["record"],
+    "expire": ["expiration"],
     "id": [
         "identification",
         "identifier"
     ],
-    "pay check": "paycheck",
-    "employee": "employment",
-    "percent": "percentage",
-    "geography": "geographic",
-    "organization": "organizational",
+    "pay check": ["paycheck"],
+    "employee": ["employment"],
+    "percent": ["percentage"],
+    "geography": ["geographic"],
+    "organization": ["organizational"],
     "married": [
         "marital",
         "marriage"
     ],
-    "operators": "operation",
-    "automatic": "automated",
-    "global": "globally",
-    "measure": "measurement",
-    "sub category": "subcategory",
-    "prospective": "prospect",
+    "operators": ["operation"],
+    "automatic": ["automated"],
+    "global": ["globally"],
+    "measure": ["measurement"],
+    "sub category": ["subcategory"],
+    "prospective": ["prospect"],
     "owner": [
         "owns",
         "ownership"
@@ -29,12 +29,12 @@
         "shipment",
         "shipping"
     ],
-    "sub total": "subtotal",
-    "create": "creation",
-    "order": "ordered",
-    "safety": "safe",
-    "hire": "hired",
-    "lead time": "leadtime",
+    "sub total": ["subtotal"],
+    "create": ["creation"],
+    "order": ["ordered"],
+    "safety": ["safe"],
+    "hire": ["hired"],
+    "lead time": ["leadtime"],
     "dim": [
         "dimension",
         "dimensional"
