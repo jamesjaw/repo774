@@ -133,7 +133,8 @@ if __name__ == "__main__":
     all_table_results = []
 
     for _idx, json in enumerate(json_total):
-        time.sleep(1)
+        if args.dataset == "nameguess":
+            time.sleep(1)
         demos = temp_prompt.demos()
         if s.VERSION_ADD_NO_CRYPTED_WORD:
             demos += "There should not be any crypted word in your expanded names. "
