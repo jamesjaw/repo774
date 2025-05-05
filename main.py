@@ -131,10 +131,9 @@ if __name__ == "__main__":
     model = OpenaiLLM(model_name)
     num_examples = sum([len(ele["gt_label"]) for ele in json_total])
     all_table_results = []
+    retry_count = 0
     error_count = 0
     for _idx, json in enumerate(json_total):
-        if args.dataset == "nameguess" or "EDI_demo":
-            time.sleep(1)
         demos = temp_prompt.demos()
         if s.VERSION_ADD_NO_CRYPTED_WORD:
             demos += "There should not be any crypted word in your expanded names. "
@@ -146,7 +145,14 @@ if __name__ == "__main__":
         )
         print(prompt)
         x_list, y_list = json["technical_name"], json["gt_label"]
-        raw_answer = model(prompt, temperature=0.0, max_tokens=1024)
+        while True:
+            try:
+                raw_answer = model(prompt, temperature=0.0, max_tokens=1024)
+                break  # Exit loop if successful
+            except Exception as e:
+                retry_count += 1
+                print(f"Error occurred: {e}")
+                time.sleep(1)  # Optional: wait before retrying
 
         answers = extract_answer(raw_answer, temp_prompt.sep_token())
         if len(answers) != len(x_list):
@@ -213,7 +219,7 @@ if __name__ == "__main__":
     print(save_res)
     print(j.dumps(save_res, indent=4))
     print("error_count:", error_count)
-
+    print("retry_count:", retry_count)
     # save results and configures
     save_dir = os.path.join('outputs', "{}-results".format(model_name))
     if not os.path.isdir(save_dir):
