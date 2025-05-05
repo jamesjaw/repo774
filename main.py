@@ -131,9 +131,9 @@ if __name__ == "__main__":
     model = OpenaiLLM(model_name)
     num_examples = sum([len(ele["gt_label"]) for ele in json_total])
     all_table_results = []
-
+    error_count = 0
     for _idx, json in enumerate(json_total):
-        if args.dataset == "nameguess":
+        if args.dataset == "nameguess" or "EDI_demo":
             time.sleep(1)
         demos = temp_prompt.demos()
         if s.VERSION_ADD_NO_CRYPTED_WORD:
@@ -152,6 +152,9 @@ if __name__ == "__main__":
         if len(answers) != len(x_list):
             y_pred_list = [" "] * len(x_list)
             print("Error! The extracted answers are not correct.")
+            error_count += 1
+            # print(len(answers), len(x_list))
+            # exit(1)
         else:
             y_pred_list = answers
             for _x, _pred, _y in zip(x_list, y_pred_list, y_list):
@@ -172,7 +175,7 @@ if __name__ == "__main__":
                     str(_pred),
                 ]
             )
-            all_table_results += table_result
+        all_table_results += table_result
 
     pred_df = pd.DataFrame(
         all_table_results,
@@ -209,6 +212,7 @@ if __name__ == "__main__":
     }
     print(save_res)
     print(j.dumps(save_res, indent=4))
+    print("error_count:", error_count)
 
     # save results and configures
     save_dir = os.path.join('outputs', "{}-results".format(model_name))
