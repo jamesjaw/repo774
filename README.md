@@ -19,7 +19,7 @@ export OPENAI_API_KEY=[key_value]
 ### Reason for this:
 Adding table information might help what table the column belongs to, giving the LLM more context.
 ### Result:
-![alt-text](./image/basic.png)
+![alt-text](./image/with_table_name.png)
 
 ## Prompt with extra string "There should not be any crypted word in your expanded names. " (Slightly Better than Basic Prompt)
 ### Reason for this:

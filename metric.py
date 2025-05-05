@@ -203,7 +203,7 @@ class SQuAD_eval:
             if isinstance(ref, str):
                 ref = self.normalize_answer(ref)
                 # TODO 1 using synonym to expland reference(gold)
-                print("old:", ref)
+                # print("old:", ref)
                 try:
                     sysnonyms_path = "./dataset/AdventureWork_1/synonyms.json"
                     if os.path.exists(sysnonyms_path):
@@ -223,7 +223,7 @@ class SQuAD_eval:
                         ref = expanded_refs
                 except Exception as e:
                     print((f"Warning: Failed to load or process synonyms: {e}"))
-                print("new:", ref)
+                # print("new:", ref)
                 
             else:
                 # TODO we will support multi groundtruth in the future
