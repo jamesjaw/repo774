@@ -7,7 +7,8 @@ class PromptTemplate:
     def demos(self):
         _demo = (
             "As abbreviations of column names from a table, "
-            "c_name | pCd | dt stand for Customer Name | Product Code | Date. "
+            "c_name | pCd | dt stand for Customer Name | Product Code | Date. \n"
+            "Please respond with only the expanded column names separated by ' | ' and in the same order. No explanations."
         )
         _demo_steps = (
             "To expand crypted column names, follow the following rules: "
@@ -53,7 +54,7 @@ class OpenaiLLM:
         *args: Any,
         **kwargs: Any,
     ) -> str:
-        if self.model_name == "gpt-3.5-turbo" or self.model_name == 'gpt-4':
+        if self.model_name == "gpt-3.5-turbo" or self.model_name == 'gpt-4o-mini':
             completion = openai.ChatCompletion.create(
                 model=self.model_name,
                 temperature=temperature,

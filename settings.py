@@ -5,4 +5,4 @@ VERSION_STEPS = 0
 
 # remember to set dataset name and set expland gold to 1 
 EXPLAND_GOLD = 1
-DATASET_NAME = "AdventureWork_1"
+DATASET_NAME = "nameguess"

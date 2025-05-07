@@ -101,10 +101,24 @@ def preprocess_nameguess():
     return json_structs
 
 
+# def extract_answer(raw_answer_str: str, sep_token: str):
+#     processed_str = raw_answer_str.strip("").split(".")[0]
+#     answer_list = [_ans.strip("") for _ans in processed_str.split(sep_token)]
+#     return answer_list
 def extract_answer(raw_answer_str: str, sep_token: str):
-    processed_str = raw_answer_str.strip("").split(".")[0]
-    answer_list = [_ans.strip("") for _ans in processed_str.split(sep_token)]
-    return answer_list
+    if not raw_answer_str:
+        return []
+
+    raw_answer_str = raw_answer_str.strip()
+
+    # Heuristic: find the first line with the expected separator
+    for line in raw_answer_str.splitlines():
+        if sep_token in line and not line.lower().startswith("as abbreviation"):
+            parts = [part.strip() for part in line.split(sep_token) if part.strip()]
+            return parts
+
+    # Fallback: try to split the whole response if no good line was found
+    return [part.strip() for part in raw_answer_str.split(sep_token) if part.strip()]
 
 
 if __name__ == "__main__":
@@ -127,7 +141,7 @@ if __name__ == "__main__":
     print("============ Start Feeding Data to GPT ============")
 
     temp_prompt = PromptTemplate()
-    model_name = "gpt-3.5-turbo"
+    model_name = "gpt-4o-mini" #"gpt-3.5-turbo"
     model = OpenaiLLM(model_name)
     num_examples = sum([len(ele["gt_label"]) for ele in json_total])
     all_table_results = []
@@ -141,7 +155,10 @@ if __name__ == "__main__":
             demos += "Every single word in the column names should be expanded. "
 
         prompt = (
-            demos + json["query"]
+                demos + "\n\n"
+                        "Now expand the following:\n"
+                + json["query"] +
+                "\nPlease respond with only the expanded column names separated by ' | ' and in the same order. No explanations."
         )
         print(prompt)
         x_list, y_list = json["technical_name"], json["gt_label"]
@@ -159,8 +176,9 @@ if __name__ == "__main__":
             y_pred_list = [" "] * len(x_list)
             print("Error! The extracted answers are not correct.")
             error_count += 1
-            # print(len(answers), len(x_list))
-            # exit(1)
+            print(len(answers), len(x_list))
+            print(answers)
+            exit(1)
         else:
             y_pred_list = answers
             for _x, _pred, _y in zip(x_list, y_pred_list, y_list):
