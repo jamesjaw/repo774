@@ -79,26 +79,55 @@ def preprocess_EDI_demo():
     assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
     return json_structs
 
-def preprocess_nameguess():
+def preprocess_nameguess(namer_llm):
     df = load_pickle("./dataset/nameguess/gold.pkl")
     print(df)
     grouped = df.groupby(['table_id'])
-    json_structs = [
-        {
+    # json_structs = [
+    #     {
+    #         "dataset_name": "nameguess",
+    #         "table_name": "",
+    #         "technical_name": group_df['technical_name'].tolist(),  # crypted name
+    #         "gt_label": group_df['gt_label'].tolist()
+    #     }
+    #     for key, group_df in grouped
+    # ]
+    # for item in json_structs:
+    #     aliases = " | ".join(item["technical_name"])
+    #     table_name = ""
+    #     if s.VERSION_ADD_TABLE_NAME:
+    #         table_name = " named " + item["table_name"]
+    #     item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for "
+    # assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
+    # return json_structs
+
+    json_structs = []
+    for key, group_df in grouped:
+        aliases      = group_df['technical_name'].tolist()
+        alias_str    = " | ".join(aliases)
+
+        # --- NEW: ask the LLM for a name once per table ---
+        tbl_name = guess_table_name(alias_str, namer_llm)
+        print(tbl_name)
+        time.sleep(0.1)
+
+        item = {
             "dataset_name": "nameguess",
-            "table_name": "",
-            "technical_name": group_df['technical_name'].tolist(),  # crypted name
+            "table_name": tbl_name,                  # ← now filled
+            "technical_name": aliases,
             "gt_label": group_df['gt_label'].tolist()
         }
-        for key, group_df in grouped
-    ]
-    for item in json_structs:
-        aliases = " | ".join(item["technical_name"])
-        table_name = ""
+
+        # reuse the existing prompt builder
+        prefix = ""
         if s.VERSION_ADD_TABLE_NAME:
-            table_name = " named " + item["table_name"]
-        item["query"] = f"As abbreviations of column names from a table{table_name}, {aliases} stand for "
-    assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
+            prefix = " named " + tbl_name
+        item["query"] = (
+            f"As abbreviations of column names from a table{prefix}, "
+            f"{alias_str} stand for "
+        )
+        json_structs.append(item)
+
     return json_structs
 
 
@@ -106,6 +135,19 @@ def extract_answer(raw_answer_str: str, sep_token: str):
     processed_str = raw_answer_str.strip("").split(".")[0]
     answer_list = [_ans.strip("") for _ans in processed_str.split(sep_token)]
     return answer_list
+
+def guess_table_name(alias_str: str, llm: "OpenaiLLM") -> str:
+    """
+    Use the LLM to propose a concise English table name.
+    The prompt is deliberately simple so we can parse it by .strip().
+    """
+    prompt = (
+        "You see these abbreviated column names from one relational table:\n\n"
+        f"{alias_str}\n\n"
+        "Propose a concise English table name (no abbreviations, ≤ 3 words). "
+        "Return **only** the name."
+    )
+    return llm(prompt, temperature=0.2, max_tokens=20).strip()
 
 
 if __name__ == "__main__":
@@ -124,7 +166,12 @@ if __name__ == "__main__":
         json_total = preprocess_EDI_demo()
         s.DATASET_NAME = "EDI_demo"
     elif args.dataset == "nameguess":
-        json_total = preprocess_nameguess()
+        # json_total = preprocess_nameguess()
+        # s.DATASET_NAME = "nameguess"
+
+        # ---- new: build a *namer* LLM used only for naming tables ----
+        namer_llm = OpenaiLLM("gpt-3.5-turbo")
+        json_total = preprocess_nameguess(namer_llm)
         s.DATASET_NAME = "nameguess"
 
     if s.DATASET_NAME not in ["AdventureWork_1", "AdventureWork_2", "EDI_demo", "nameguess"]:
