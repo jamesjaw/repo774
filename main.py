@@ -8,6 +8,8 @@ import settings as s
 import argparse
 import time
 from datetime import datetime
+import sys
+import json
 
 def load_pickle(filename):
     with open(filename, 'rb') as file:
@@ -79,7 +81,7 @@ def preprocess_EDI_demo():
     assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
     return json_structs
 
-def preprocess_nameguess(namer_llm):
+def preprocess_nameguess(namer_llm=None):
     df = load_pickle("./dataset/nameguess/gold.pkl")
     print(df)
     grouped = df.groupby(['table_id'])
@@ -101,15 +103,30 @@ def preprocess_nameguess(namer_llm):
     # assert (len(df) == sum(len(item["gt_label"]) for item in json_structs))
     # return json_structs
 
+    cache_path = "./dataset/nameguess/table_names_cache.json"
+    # try to load cached names
+    if os.path.exists(cache_path):
+        with open(cache_path, "r", encoding="utf-8") as f:
+            name_cache = json.load(f)          # {table_id: table_name}
+    else:
+        name_cache = {}
+
     json_structs = []
     for key, group_df in grouped:
         aliases      = group_df['technical_name'].tolist()
         alias_str    = " | ".join(aliases)
 
         # --- NEW: ask the LLM for a name once per table ---
-        tbl_name = guess_table_name(alias_str, namer_llm)
-        print(tbl_name)
-        time.sleep(0.1)
+        table_id = str(key)
+        if table_id in name_cache:             # ② cached → reuse
+            tbl_name = name_cache[table_id]
+        else:                                  # ③ not cached → call LLM
+            if namer_llm is None:
+                raise RuntimeError("Table-name cache missing and no LLM available.")
+            tbl_name = guess_table_name(alias_str, namer_llm)
+            print(tbl_name)
+            name_cache[table_id] = tbl_name
+            time.sleep(0.1)  
 
         item = {
             "dataset_name": "nameguess",
@@ -127,6 +144,12 @@ def preprocess_nameguess(namer_llm):
             f"{alias_str} stand for "
         )
         json_structs.append(item)
+
+
+    # persist any new names (overwrites file or creates it)
+    with open(cache_path, "w", encoding="utf-8") as f:
+        json.dump(name_cache, f, indent=2, ensure_ascii=False)
+    print(f"Table names cached to {cache_path}")
 
     return json_structs
 
@@ -147,7 +170,15 @@ def guess_table_name(alias_str: str, llm: "OpenaiLLM") -> str:
         "Propose a concise English table name (no abbreviations, ≤ 3 words). "
         "Return **only** the name."
     )
-    return llm(prompt, temperature=0.2, max_tokens=20).strip()
+    for attempt in range(1, 10 + 1):
+        try:
+            return llm(prompt, temperature=0.2, max_tokens=20).strip()
+        except Exception as e:
+            #print(f"[LLM Retry] Failed attempt {attempt}/{max_retries}: {e}")
+            time.sleep(0.5 * attempt)  # exponential-ish backoff
+
+    print("!!! Too many failures generating a table name, using fallback.")
+    sys.exit(1)
 
 
 if __name__ == "__main__":
@@ -170,7 +201,10 @@ if __name__ == "__main__":
         # s.DATASET_NAME = "nameguess"
 
         # ---- new: build a *namer* LLM used only for naming tables ----
-        namer_llm = OpenaiLLM("gpt-3.5-turbo")
+        cache_path = "./dataset/nameguess/table_names_cache.json"
+        namer_llm  = None
+        if not os.path.exists(cache_path):
+            namer_llm = OpenaiLLM("gpt-3.5-turbo")
         json_total = preprocess_nameguess(namer_llm)
         s.DATASET_NAME = "nameguess"
 
