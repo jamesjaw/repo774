@@ -13,7 +13,7 @@ class PromptTemplate:
             "To expand crypted column names, follow the following rules: "
             "1. As abbreviations of column names from a table, c_name | pCd | dt stand for Customer Name | Product Code | Date. "
             "2. Based on the given table name, generate the most possible expanded column name. "
-            "3. The words in a expanded column name shouldn't be joined together (separate by space). "
+            "3. The words in an expanded column name should be separate by spaces. "
             "4. Make sure your expanded names are fully expanded (e.g. HTTP could further expand to Hypertext Transfer Protocol, NO. could expand to Number) "
         )
 

@@ -7,6 +7,7 @@ import os
 import settings as s
 import argparse
 import time
+from datetime import datetime
 
 def load_pickle(filename):
     with open(filename, 'rb') as file:
@@ -108,18 +109,27 @@ def extract_answer(raw_answer_str: str, sep_token: str):
 
 
 if __name__ == "__main__":
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, help='dataset you\'d like to run')
     args = parser.parse_args()
 
     if args.dataset == "AdventureWork_1":
         json_total = preprocess_AdventureWork_1()
+        s.DATASET_NAME = "AdventureWork_1"
     elif args.dataset == "AdventureWork_2":
         json_total = preprocess_AdventureWork_2()
+        s.DATASET_NAME = "AdventureWork_2"
     elif args.dataset == "EDI_demo":
         json_total = preprocess_EDI_demo()
+        s.DATASET_NAME = "EDI_demo"
     elif args.dataset == "nameguess":
         json_total = preprocess_nameguess()
+        s.DATASET_NAME = "nameguess"
+
+    if s.DATASET_NAME not in ["AdventureWork_1", "AdventureWork_2", "EDI_demo", "nameguess"]:
+        print("dateset name wrong")
+        exit(1)
 
     # json_string = json.dumps(json_total, indent=2)
     # print(json_string)
@@ -224,8 +234,8 @@ if __name__ == "__main__":
     save_dir = os.path.join('outputs', "{}-results".format(model_name))
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    with open(os.path.join(save_dir, f"{model_name}_results.json"), "w") as fo:
+    with open(os.path.join(save_dir, f"{model_name}_results_{s.DATASET_NAME}_{s.VERSION_ADD_TABLE_NAME}_{s.VERSION_STEPS}_{s.EXPLAND_GOLD}_{timestamp}.json"), "w") as fo:
         j.dump(save_res, fo, indent=4)
     # save individual prediction results
-    pred_df.to_csv(os.path.join(save_dir, f"{model_name}_predictions.csv"))
+    pred_df.to_csv(os.path.join(save_dir, f"{model_name}_predictions_{s.DATASET_NAME}_{s.VERSION_ADD_TABLE_NAME}_{s.VERSION_STEPS}_{s.EXPLAND_GOLD}_{timestamp}.csv"))
 
